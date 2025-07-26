@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Générateur de Cartes - Communauté USD</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+        :root {
+            /* Variables de charte graphique - modifiables */
+            --primary-color: #33e08d;
+            --secondary-color: #F1C40F;
+            --accent-color: #E67E22;
+            --text-dark: #2C3E50;
+            --text-light: #FFFFFF;
+            --gradient-start: #33e08d;
+            --gradient-end: #022132;
+            --border-radius: 20px;
+            --shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Poppins, sans-serif;
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            min-width: 1024px;
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            align-items: start;
+        }
+
+        .form-section {
+            background: white;
+            padding: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+
+        .preview-section {
+            font-family: 'Poppins', sans-serif;
+            position: sticky;
+            top: 20px;
+        }
+
+        h1 {
+            color: var(--text-dark);
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 2em;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: var(--text-dark);
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="range"] {
+            padding: 0;
+            height: 6px;
+            background: #ddd;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: var(--primary-color);
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: var(--primary-color);
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+        }
+
+        .opacity-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .opacity-container input {
+            flex: 1;
+        }
+
+        .opacity-container span {
+            min-width: 40px;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .file-input {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-input input[type=file] {
+            position: absolute;
+            left: -9999px;
+        }
+
+        .file-input-label {
+            display: block;
+            padding: 12px;
+            background: var(--primary-color);
+            color: white;
+            text-align: center;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .file-input-label:hover {
+            background: var(--gradient-start);
+        }
+
+        .card-preview {
+            width: 650px;
+            height: auto;
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+            color: white;
+            padding-bottom: 2rem;
+        }
+
+        .card-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('image/logo.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            opacity: 0.2;
+            z-index: 1;
+        }
+
+        .card-content {
+            position: relative;
+            z-index: 2;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-header {
+            padding: 20px;
+            text-align: center;
+        }
+
+        .logo-placeholder {
+            width: fit-content;
+            height: auto;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: var(--text-dark);
+            font-weight: bold;
+            object-fit: contain;
+        }
+
+        .edition-title {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+            color: var(--secondary-color);
+        }
+
+        .main-title {
+            font-size: 1.8em;
+            font-weight: bold;
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+
+        .subtitle {
+            font-size: 1em;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+
+        .member-section {
+            padding: 0 20px;
+            display: flex;
+            max-width: 100%;
+            margin-inline: auto;
+            margin-bottom: 30px;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .photo-container {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 4px solid var(--secondary-color);
+            overflow: hidden;
+            background: rgba(255,255,255,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .photo-preview {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .photo-placeholder {
+            color: white;
+            text-align: center;
+            font-size: 12px;
+        }
+
+        .member-info {
+            flex: 1;
+        }
+
+        .member-name {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .member-role {
+            font-size: 1em;
+            opacity: 0.9;
+            margin-bottom: 10px;
+        }
+
+        .member-company {
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+
+        .event-details {
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .detail-item {
+            text-align: center;
+            flex: 1;
+        }
+
+        .detail-icon {
+            width: 30px;
+            height: 30px;
+            background: var(--secondary-color);
+            border-radius: 50%;
+            margin: 0 auto 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: var(--text-dark);
+        }
+
+        .detail-label {
+            font-size: 0.8em;
+            opacity: 0.8;
+            margin-bottom: 2px;
+        }
+
+        .detail-value {
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+
+        .cohorte-message {
+            text-align: center;
+            padding: 20px;
+            background: rgba(255,255,255,0.1);
+            margin: 20px;
+            border-radius: 10px;
+            font-style: italic;
+        }
+
+        .download-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background: var(--accent-color);
+            color: white;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 16px;
+            margin-top: 20px;
+            transition: background 0.3s;
+            cursor: pointer;
+            border: none;
+        }
+
+        .download-btn:hover {
+            background: #D35400;
+        }
+
+        /*@media (max-width: 768px) {*/
+        /*    .container {*/
+        /*        grid-template-columns: 1fr;*/
+        /*        gap: 20px;*/
+        /*    }*/
+
+        /*    .member-section {*/
+        /*        flex-direction: column;*/
+        /*        text-align: center;*/
+        /*    }*/
+
+        /*    .event-details {*/
+        /*        flex-direction: column;*/
+        /*        gap: 15px;*/
+        /*    }*/
+        /*}*/
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="form-section">
+        <h1>Créer votre carte communauté</h1>
+
+        <form id="cardForm">
+            <div class="form-group">
+                <label for="memberName">Nom complet *</label>
+                <input type="text" id="memberName" required placeholder="Jean Dupont">
+            </div>
+
+            <div class="form-group">
+                <label for="memberRole">Rôle/Titre *</label>
+                <input type="text" id="memberRole" required placeholder="Développeur Full Stack">
+            </div>
+
+            <div class="form-group">
+                <label for="memberCompany">Entreprise/Organisation/Université</label>
+                <input type="text" id="memberCompany" placeholder="Tech Startup Inc.">
+            </div>
+
+            <div class="form-group">
+                <label for="cohorteNumber">Numéro de cohorte *</label>
+                <input type="number" id="cohorteNumber" required placeholder="1" min="1">
+            </div>
+
+            <div class="form-group">
+                <label for="eventDate">Date de publication/l'événement *</label>
+                <input type="date" id="eventDate" required>
+            </div>
+
+            <div class="form-group">
+                <label for="eventLocation">Lieu</label>
+                <input type="text" id="eventLocation" placeholder="Cotonou, Bénin">
+            </div>
+
+            <div class="form-group">
+                <label for="sessionType">Type de session</label>
+                <select id="sessionType">
+                    <option value="Hybride">Hybride</option>
+                    <option value="Présentiel">Présentiel</option>
+                    <option value="Virtuel">Virtuel</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="memberPhoto">Photo professionnelle</label>
+                <div class="file-input">
+                    <input type="file" id="memberPhoto" accept="image/*">
+                    <label for="memberPhoto" class="file-input-label">Choisir une photo</label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="customMessage">Message personnalisé (optionnel)</label>
+                <textarea id="customMessage" rows="3" placeholder="Fier de faire partie de cette communauté innovante..."></textarea>
+            </div>
+        </form>
+    </div>
+
+    <div class="preview-section">
+        <div class="card-preview" id="cardPreview">
+            <div class="card-background" id="cardBackground"></div>
+            <div class="card-content">
+                <div class="card-header">
+                    <img class="logo-placeholder" src="image/logo-complete.png" alt="Logo USD" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div class="edition-title">Cohorte #<span id="previewCohorte">1</span></div>
+                    <div class="main-title">USD's COMMUNITY<br>INNOVATION & TECH</div>
+                    <div class="subtitle">Construire l'avenir numérique ensemble</div>
+                </div>
+
+                <div class="member-section">
+                    <div class="photo-container">
+                        <div class="photo-placeholder" id="photoPlaceholder">Photo<br>Profil</div>
+                        <img id="photoPreview" class="photo-preview" style="display: none;" alt="profile photo">
+                    </div>
+                    <div class="member-info">
+                        <div class="member-name" id="previewName">Votre Nom</div>
+                        <div class="member-role" id="previewRole">Votre Rôle</div>
+                        <div class="member-company" id="previewCompany">Votre Entreprise</div>
+                    </div>
+                </div>
+
+                <div class="event-details">
+                    <div class="detail-item">
+                        <div class="detail-icon" id="previewDay">19</div>
+                        <div class="detail-label">DATE</div>
+                        <div class="detail-value" id="previewMonth">JANVIER<br>2025</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-icon">👥</div>
+                        <div class="detail-label">Session</div>
+                        <div class="detail-value" id="previewSession">Hybride</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-icon">📍</div>
+                        <div class="detail-label">LIEU</div>
+                        <div class="detail-value" id="previewLocation">Paris<br>France</div>
+                    </div>
+                </div>
+
+                <div class="cohorte-message" id="previewMessage">
+                    "Membre actif de la communauté USD - Cohorte #<span id="previewCohorteMsg">1</span>"
+                </div>
+
+                <!-- Message stylisé -->
+                <div style="text-align: center; margin-top: 20px;">
+                    <span style="
+                        font-family: 'Pacifico', cursive;
+                        font-size: 24px;
+                        color: var(--secondary-color);
+                        background: rgba(255,255,255,0.1);
+                        padding: 8px 20px;
+                        border-radius: 12px;
+                        display: inline-block;
+                    ">J’y participe 🎉</span>
+                </div>
+
+                <!-- Réseaux sociaux -->
+                <div style="margin-top: 20px; text-align: center; color: white;">
+                    <a href="https://facebook.com" target="_blank" style="margin: 0 10px; color: white;"><i class="fab fa-facebook fa-2x"></i></a>
+                    <a href="https://instagram.com" target="_blank" style="margin: 0 10px; color: white;"><i class="fab fa-instagram fa-2x"></i></a>
+                    <a href="https://linkedin.com" target="_blank" style="margin: 0 10px; color: white;"><i class="fab fa-linkedin fa-2x"></i></a>
+                    <a href="https://x.com" target="_blank" style="margin: 0 10px; color: white;"><i class="fab fa-x-twitter fa-2x"></i></a>
+                    <a href="https://youtube.com" target="_blank" style="margin: 0 10px; color: white;"><i class="fab fa-youtube fa-2x"></i></a>
+                </div>
+            </div>
+        </div>
+
+        <button class="download-btn" onclick="downloadCard()">
+            📥 Télécharger la carte (PNG)
+        </button>
+    </div>
+</div>
+
+<script>
+    // Variables de configuration - modifiables
+    const CONFIG = {
+        communityName: "COMMUNAUTÉ USD",
+        subtitle: "Construire l'avenir numérique ensemble",
+        logoText: "LOGO USD",
+        defaultMessage: "Membre actif de la communauté USD"
+    };
+
+    // Mise à jour en temps réel
+    document.getElementById('memberName').addEventListener('input', function() {
+        document.getElementById('previewName').textContent = this.value || 'Votre Nom';
+    });
+
+    document.getElementById('memberRole').addEventListener('input', function() {
+        document.getElementById('previewRole').textContent = this.value || 'Votre Rôle';
+    });
+
+    document.getElementById('memberCompany').addEventListener('input', function() {
+        document.getElementById('previewCompany').textContent = this.value || 'Votre Entreprise';
+    });
+
+    document.getElementById('cohorteNumber').addEventListener('input', function() {
+        const cohorte = this.value || '1';
+        document.getElementById('previewCohorte').textContent = cohorte;
+        document.getElementById('previewCohorteMsg').textContent = cohorte;
+    });
+
+    document.getElementById('eventDate').addEventListener('input', function() {
+        if (this.value) {
+            const date = new Date(this.value);
+            const day = date.getDate();
+            const months = ['JANVIER', 'FÉVRIER', 'MARS', 'AVRIL', 'MAI', 'JUIN',
+                'JUILLET', 'AOÛT', 'SEPTEMBRE', 'OCTOBRE', 'NOVEMBRE', 'DÉCEMBRE'];
+            const month = months[date.getMonth()];
+            const year = date.getFullYear();
+
+            document.getElementById('previewDay').textContent = day;
+            document.getElementById('previewMonth').innerHTML = `${month}<br>${year}`;
+        }
+    });
+
+    document.getElementById('eventLocation').addEventListener('input', function() {
+        document.getElementById('previewLocation').innerHTML = this.value.replace(', ', '<br>') || 'Paris<br>France';
+    });
+
+    document.getElementById('sessionType').addEventListener('change', function() {
+        document.getElementById('previewSession').textContent = this.value;
+    });
+
+    document.getElementById('customMessage').addEventListener('input', function() {
+        const cohorte = document.getElementById('cohorteNumber').value || '1';
+        const message = this.value || `${CONFIG.defaultMessage} - Cohorte #${cohorte}`;
+        document.getElementById('previewMessage').innerHTML = `"${message}"`;
+    });
+
+    // Gestion de l'upload de photo
+    document.getElementById('memberPhoto').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('photoPreview').src = e.target.result;
+                document.getElementById('photoPreview').style.display = 'block';
+                document.getElementById('photoPlaceholder').style.display = 'none';
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // Fonction de téléchargement simplifiée et corrigée
+    async function downloadCard() {
+        const button = document.querySelector('.download-btn');
+
+        try {
+            // Désactiver le bouton et afficher un message de chargement
+            button.disabled = true;
+            button.textContent = '⏳ Génération en cours...';
+
+            const card = document.getElementById('cardPreview');
+
+            // Attendre un peu pour que les changements visuels s'appliquent
+            await new Promise(resolve => setTimeout(resolve, 100));
+
+            // Utiliser html2canvas avec des options optimisées
+            const canvas = await html2canvas(card, {
+                allowTaint: true,
+                useCORS: true,
+                backgroundColor: null,
+                scale: 2, // Pour une meilleure qualité
+                width: card.clientWidth,
+                height: card.clientHeight - 10,
+                imageTimeout: 15000, // Timeout pour les images
+                onclone: function(clonedDoc) {
+                    // Assurer que les polices sont chargées dans le clone
+                    const style = clonedDoc.createElement('style');
+                    style.textContent = `
+                        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+                        @import url('https://fonts.googleapis.com/css2?family=Pacifico&display=swap');
+                    `;
+                    clonedDoc.head.appendChild(style);
+
+                    // Supprimer l'arrondi de la carte pour l'export
+                    const clonedCard = clonedDoc.querySelector('.card-preview');
+                    if (clonedCard) {
+                        clonedCard.style.borderRadius = '0px';
+                        clonedCard.style.overflow = 'visible';
+                    }
+
+                    // Corriger les images étirées
+                    const images = clonedDoc.querySelectorAll('img');
+                    images.forEach(img => {
+                        // Attendre que l'image soit chargée
+                        if (img.complete) {
+                            // Maintenir les proportions d'origine
+                            img.style.objectFit = 'cover';
+                            img.style.objectPosition = 'center';
+                        }
+                    });
+
+                    // Forcer le recalcul des dimensions
+                    const photoPreview = clonedDoc.querySelector('#photoPreview');
+                    if (photoPreview && photoPreview.style.display !== 'none') {
+                        photoPreview.style.width = '100%';
+                        photoPreview.style.height = '100%';
+                        photoPreview.style.objectFit = 'cover';
+                    }
+                }
+            });
+
+            // Convertir en blob et télécharger
+            canvas.toBlob(function(blob) {
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+
+                const memberName = document.getElementById('memberName').value || 'membre';
+                const cohorte = document.getElementById('cohorteNumber').value || '1';
+                const fileName = `carte-usd-${memberName.replace(/\s+/g, '-').toLowerCase()}-cohorte${cohorte}.png`;
+
+                link.download = fileName;
+                link.href = url;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+                // Nettoyer l'URL
+                URL.revokeObjectURL(url);
+
+                showDownloadSuccess();
+            }, 'image/png', 1.0);
+
+        } catch (error) {
+            console.error('Erreur lors du téléchargement:', error);
+            button.textContent = '❌ Erreur de téléchargement';
+            button.style.background = '#e74c3c';
+
+            setTimeout(() => {
+                button.textContent = '📥 Télécharger la carte (PNG)';
+                button.style.background = '';
+                button.disabled = false;
+            }, 3000);
+        }
+    }
+
+    // Fonction pour afficher un message de succès
+    function showDownloadSuccess() {
+        const btn = document.querySelector('.download-btn');
+        btn.textContent = '✅ Téléchargé avec succès !';
+        btn.style.background = '#27AE60';
+        btn.disabled = false;
+
+        setTimeout(() => {
+            btn.textContent = '📥 Télécharger la carte (PNG)';
+            btn.style.background = '';
+        }, 2000);
+    }
+
+    // Initialisation avec la date d'aujourd'hui
+    document.getElementById('eventDate').value = new Date().toISOString().split('T')[0];
+    document.getElementById('eventDate').dispatchEvent(new Event('input'));
+</script>
+
+<!-- Script html2canvas pour le téléchargement -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</body>
+
+</html>
